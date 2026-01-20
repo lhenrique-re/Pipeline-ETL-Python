@@ -1,0 +1,67 @@
+import os
+import csv
+from openai import OpenAI
+
+# =========================
+# CONFIGURAÇÃO OPENAI
+# =========================
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# =========================
+# EXTRACT
+# =========================
+# Simulação da extração de dados (Opção 1)
+users = [
+    {'id': 1, 'name': 'Cleitin', 'news': []},
+    {'id': 2, 'name': 'Celber 2', 'news': []},
+    {'id': 3, 'name': 'Fitipaldi', 'news': []}
+]
+
+print("📥 Dados extraídos:")
+for user in users:
+    print(user)
+
+
+# =========================
+# TRANSFORM
+# =========================
+def generate_ai_news(user):
+    """
+    Gera uma mensagem de marketing personalizada usando IA Generativa
+    """
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "Você é o supervisor de engajamento em Redes Sociais."
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Crie uma mensagem curta (máx. 100 caracteres) "
+                    f"para {user['name']} sobre da marca nas redes sociais."
+                )
+            }
+        ]
+    )
+
+    return response.choices[0].message.content.strip()
+
+
+print("\n🤖 Gerando mensagens com IA...\n")
+
+for user in users:
+    news_text = generate_ai_news(user)
+    print(f"{user['name']}: {news_text}")
+
+    user['news'].append({
+        "icon": "https://digitalinnovationone.github.io/santander-dev-week-2023-api/icons/credit.svg",
+        "description": news_text
+    })
+
+
+# =========================
+# LOAD
+# =========================
+# Salvando os dados localmente em CSV
